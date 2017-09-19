@@ -1,0 +1,5 @@
+.idea
+data/*.dot
+!data/example.dot
+output/*
+!output/README.md

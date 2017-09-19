@@ -1,0 +1,72 @@
+digraph ATM {
+    label = "ATM Withdrawal Workflow"
+    labelloc=top;
+    labeljust=center;
+
+    graph [fontname = "helvetica"];
+    node [fontname = "helvetica"];
+    edge [fontname = "helvetica"];
+
+	node[shape="diamond", style="filled", color="lemonchiffon2"]
+	    CanReadCard; ValidatePIN; ReqTransType; CheckPINAttempts; ReqTransType; BalanceCheck; InventoryCheck; DispSucc;
+	node[shape="box", style="rounded, filled", color="skyblue"]
+        CardPrompt; CardInsert; PINPrompt; IncrementAttempts; ReturnCard; SelectWithdrawal; EnterAmt; Dispense; DebitAcct; Thank; OpenTransaction; CommitTransaction; RollbackTransaction;
+
+	subgraph cluster_0 {
+		style="filled,dashed,rounded";
+		fillcolor=azure1;
+		color=deepskyblue;
+		OpenTransaction[label="Open Database Transaction"]
+        DebitAcct[label="Debit Bank Account"]
+        Dispense[label="Dispense Money"]
+        DispSucc[label="Dispense\nSuccessful?"]
+        CommitTransaction[label="Commit Database Transaction"]
+        RollbackTransaction[label="Rollback Database Transaction"]
+        OpenTransaction -> DebitAcct -> Dispense -> DispSucc;
+        DispSucc -> RollbackTransaction [label="No"];
+        DispSucc -> CommitTransaction [label="Yes"];
+		label = "Database Transaction";
+	}
+
+    Start[label="User Approaches ATM", style="filled", color="skyblue3"]
+    CardPrompt[label="Prompt User for Card"]
+    CardInsert[label="User Inserts Card"]
+    CanReadCard[label="Card Read\nSuccessful?"]
+    PINPrompt[label="Prompt for PIN"]
+    ValidatePIN[label="PIN\nCorrect?"]
+    CheckPINAttempts[label="PIN\nAttempts?"]
+    IncrementAttempts[label="Increment Attempts"]
+    ReturnCard[label="Return User ATM Card"]
+    ReqTransType[label="Transaction\nType?"]
+    SelectWithdrawal[label="User Selects Withdrawal"]
+    EnterAmt[label="User Enters Amount"]
+    BalanceCheck[label="User\nHas Funds?"]
+    InventoryCheck[label="ATM\nHas Funds?"]
+    Complete[label="Transaction Complete", style="filled", color="seagreen2"]
+    Thank[label="Show Thank You Message"]
+    Fail[label="Error. Display Message", style="filled", color="rosybrown2"]
+
+    Start -> CardPrompt;
+    CardPrompt -> CardInsert;
+    CardInsert -> CanReadCard;
+    CanReadCard -> Fail [label="No"];
+    CanReadCard -> CheckPINAttempts [label="Yes"];
+    CheckPINAttempts -> PINPrompt [label="< 3"];
+    CheckPINAttempts -> Fail [label=">=3"];
+    PINPrompt -> ValidatePIN;
+    ValidatePIN -> IncrementAttempts [label="No"];
+    IncrementAttempts ->CheckPINAttempts;
+    ValidatePIN -> ReqTransType [label="Yes"];
+    ReqTransType -> SelectWithdrawal;
+    SelectWithdrawal -> EnterAmt;
+    EnterAmt -> BalanceCheck;
+    BalanceCheck -> Fail [label="No"];
+    BalanceCheck -> InventoryCheck [label="Yes"];
+    InventoryCheck -> Fail [label="No"];
+    InventoryCheck -> OpenTransaction [label="Yes"];
+    ReturnCard -> Complete;
+    CommitTransaction -> Thank
+    RollbackTransaction -> Fail
+    Fail -> ReturnCard;
+    Thank -> ReturnCard;
+}

@@ -1,0 +1,11 @@
+version: '2'
+
+services:
+
+    diazo:
+        build:
+            context: ./application
+        volumes:
+            - ./data:/usr/src/app/data
+            - ./output:/usr/src/app/output
+
